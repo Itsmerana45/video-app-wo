@@ -1,17 +1,6 @@
+// next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: true,
-  },
-  output: 'export',
-  trailingSlash: true,
-  distDir: 'out',
-}
-
-export default nextConfig
+  output: 'standalone', // makes a self-contained server bundle
+};
+export default nextConfig;
