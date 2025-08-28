@@ -1,4 +1,4 @@
-name: Deploy Next.js to Azure Web App
+name: Deploy Next.js (pnpm) to Azure Web App
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: video-platform-app   # <-- put your exact App Service name
+  AZURE_WEBAPP_NAME: video-platform-app   # <-- put exact App Service name
   NODE_VERSION: '20.x'
 
 permissions:
@@ -18,24 +18,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
 
-      - name: Install deps (CI)
-        run: npm ci
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
 
       - name: Build Next.js (standalone)
-        run: npm run build
+        run: pnpm run build
 
-      # Prepare a minimal folder for Azure:
-      # - .next/standalone (server)
-      # - .next/static (assets)
-      # - public (your public assets)
-      - name: Bundle app for Azure
+      # Package the minimal server bundle for Azure
+      - name: Bundle for Azure
         run: |
           rm -rf ./azure
           mkdir -p ./azure/.next
@@ -43,7 +46,7 @@ jobs:
           mkdir -p ./azure/.next/static
           cp -r ./.next/static ./azure/.next/static
           if [ -d "./public" ]; then cp -r ./public ./azure/public; fi
-          # Include package.json so Azure can run npm start if needed (optional)
+          # Include package.json (optional but handy)
           cp ./package.json ./azure/package.json
 
       - name: Upload artifact
@@ -56,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'Production'
+      name: Production
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
@@ -65,10 +68,27 @@ jobs:
         with:
           name: nextjs-azure
 
-      - name: Deploy to Azure WebApp
+      # OPTION 1: If you have PUBLISH PROFILE (easiest)
+      - name: Deploy with publish profile
         id: deploy-to-webapp
+        if: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE != '' }}
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: .
+
+      # OPTION 2: If you DON'T have publish profile, use a service principal (AZURE_CREDENTIALS)
+      - name: Azure login (OIDC/SPN)
+        if: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE == '' && secrets.AZURE_CREDENTIALS != '' }}
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy with logged-in context
+        id: deploy-to-webapp-spn
+        if: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE == '' && secrets.AZURE_CREDENTIALS != '' }}
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: .
