@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: video-platform-app   # <-- put exact App Service name
+  AZURE_WEBAPP_NAME: video-platform-app
   NODE_VERSION: '20.x'
 
 permissions:
@@ -37,7 +37,6 @@ jobs:
       - name: Build Next.js (standalone)
         run: pnpm run build
 
-      # Package the minimal server bundle for Azure
       - name: Bundle for Azure
         run: |
           rm -rf ./azure
@@ -46,7 +45,6 @@ jobs:
           mkdir -p ./azure/.next/static
           cp -r ./.next/static ./azure/.next/static
           if [ -d "./public" ]; then cp -r ./public ./azure/public; fi
-          # Include package.json (optional but handy)
           cp ./package.json ./azure/package.json
 
       - name: Upload artifact
@@ -60,7 +58,7 @@ jobs:
     needs: build
     environment:
       name: Production
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      url: ${{ steps.deploy-to-webapp-spn.outputs.webapp-url }}
 
     steps:
       - name: Download artifact
@@ -68,26 +66,26 @@ jobs:
         with:
           name: nextjs-azure
 
-      # OPTION 1: If you have PUBLISH PROFILE (easiest)
+      # Check for Publish Profile Secret
       - name: Deploy with publish profile
+        if: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         id: deploy-to-webapp
-        if: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE != '' }}
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
 
-      # OPTION 2: If you DON'T have publish profile, use a service principal (AZURE_CREDENTIALS)
-      - name: Azure login (OIDC/SPN)
-        if: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE == '' && secrets.AZURE_CREDENTIALS != '' }}
+      # If Publish Profile is missing, use Service Principal credentials
+      - name: Azure login (Service Principal)
+        if: ${{ !secrets.AZURE_WEBAPP_PUBLISH_PROFILE && secrets.AZURE_CREDENTIALS }}
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy with logged-in context
+      - name: Deploy to Azure Web App (Service Principal)
         id: deploy-to-webapp-spn
-        if: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE == '' && secrets.AZURE_CREDENTIALS != '' }}
+        if: ${{ !secrets.AZURE_WEBAPP_PUBLISH_PROFILE && secrets.AZURE_CREDENTIALS }}
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
