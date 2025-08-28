@@ -1,0 +1,155 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated color scheme to TikTok-like dark theme */
+  --background: #1f2937; /* Dark background for the app */
+  --foreground: #ffffff; /* Primary text color */
+  --card: #374151; /* Dark card background for content */
+  --card-foreground: #f1f5f9; /* Light text on cards */
+  --popover: #475569; /* Background for popovers */
+  --popover-foreground: #ffffff; /* Text in popovers */
+  --primary: #8b5cf6; /* Accent color for buttons and highlights */
+  --primary-foreground: #ffffff; /* Text on primary buttons */
+  --secondary: #6b7280; /* Secondary elements */
+  --secondary-foreground: #ffffff; /* Text on secondary buttons */
+  --muted: #374151; /* Muted elements */
+  --muted-foreground: #ffffff; /* Text for muted elements */
+  --accent: #d97706; /* Alternative accent color for highlights */
+  --accent-foreground: #ffffff; /* Text on accent elements */
+  --destructive: #dc2626; /* Color for destructive actions */
+  --destructive-foreground: #ffffff; /* Text for destructive actions */
+  --border: #6b7280; /* Border color for elements */
+  --input: #374151; /* Input field background */
+  --ring: #8b5cf6; /* Focus ring color */
+  --chart-1: #4f46e5; /* Chart color 1 */
+  --chart-2: #3b82f6; /* Chart color 2 */
+  --chart-3: #22c55e; /* Chart color 3 */
+  --chart-4: #fbbf24; /* Chart color 4 */
+  --chart-5: #ef4444; /* Chart color 5 */
+  --radius: 0.5rem; /* Corner rounding size */
+  --sidebar: #1f2937; /* Sidebar background */
+  --sidebar-foreground: #ffffff; /* Text in sidebar */
+  --sidebar-primary: #374151; /* Primary sidebar elements */
+  --sidebar-primary-foreground: #ffffff; /* Text on primary sidebar elements */
+  --sidebar-accent: #8b5cf6; /* Accent color in sidebar */
+  --sidebar-accent-foreground: #ffffff; /* Text on sidebar accent elements */
+  --sidebar-border: #6b7280; /* Border for sidebar */
+  --sidebar-ring: #8b5cf6; /* Focus ring for sidebar elements */
+  --font-inter: "Inter", sans-serif; /* New Google Font */
+  --font-jetbrains-mono: "JetBrains Mono", monospace; /* New Google Font */
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  --primary: #a855f7;
+  --primary-foreground: #ffffff;
+  --secondary: #475569;
+  --secondary-foreground: #f8fafc;
+  --muted: #334155;
+  --muted-foreground: #cbd5e1;
+  --accent: #f59e0b;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #475569;
+  --input: #334155;
+  --ring: #a855f7;
+  --chart-1: #6366f1;
+  --chart-2: #3b82f6;
+  --chart-3: #10b981;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #1e293b;
+  --sidebar-primary-foreground: #f8fafc;
+  --sidebar-accent: #a855f7;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #475569;
+  --sidebar-ring: #a855f7;
+}
+
+@theme inline {
+  /* Updated font variables to match the new Google Fonts */
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .snap-scroll-container {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .video-feed-container {
+    overscroll-behavior: contain;
+    scroll-snap-type: y mandatory;
+  }
+
+  .video-feed-item {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}
